@@ -1,4 +1,7 @@
 from typing import List
+import nltk
+
+nltk.download('punkt')
 
 import markdownify
 from bs4 import BeautifulSoup
@@ -25,7 +28,7 @@ def convert_html_to_markdown(html_file: str) -> str:
     return markdown_content
 
 
-def chunk_text(text: str, chunk_size: int = 300) -> List[str]:
+def chunk_text(text: str, max_chunk_size: int = 300) -> List[str]:
     """
     ---- PLACEHOLDER VERSION ----
     ---- TO BE MODIFIED ----
@@ -38,8 +41,24 @@ def chunk_text(text: str, chunk_size: int = 300) -> List[str]:
     Returns:
         List[str]: A list of text chunks.
     """
-    words = text.split()
-    chunks = [
-        " ".join(words[i : i + chunk_size]) for i in range(0, len(words), chunk_size)
-    ]
+    
+    # Tokenize the text into sentences
+    sentences = nltk.sent_tokenize(text)
+    chunks = []
+    current_chunk = ""
+    
+    for sentence in sentences:
+        # Check if adding this sentence would exceed the chunk size
+        if len(current_chunk) + len(sentence) + 1 > max_chunk_size:
+            # If so, add the current chunk to chunks and start a new one
+            chunks.append(current_chunk.strip())
+            current_chunk = sentence
+        else:
+            # Otherwise, keep adding sentences to the current chunk
+            current_chunk += " " + sentence if current_chunk else sentence
+    
+    # Add the last chunk if it's non-empty
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+    
     return chunks
